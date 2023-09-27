@@ -13,7 +13,17 @@ export const appRouter = router({
         greeting: `hello ${input?.text ?? 'world'}`,
         time: new Date()
       }
-    })
+    }),
+  prismaTest: publicProcedure
+    .query(
+      async ({ ctx }) => {
+        const example = await ctx.prisma.example.findFirst()
+        return {
+          example
+        }
+      }
+      // async ({ ctx }) => await ctx.prisma.example.findMany()
+    )
 })
 
 // export type definition of API
