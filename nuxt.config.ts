@@ -7,7 +7,12 @@ export default defineNuxtConfig({
   build: {
     transpile: [
       'trpc-nuxt'
-    ]
+    ],
+    postcss: {
+      plugins: {
+        'postcss-custom-properties': false
+      }
+    }
   },
   typescript: {
     shim: false
