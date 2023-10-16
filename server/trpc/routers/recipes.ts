@@ -13,7 +13,8 @@ export const recipesRoute = router({
     )
     .query(({ input }) => {
       const mcData = minecraftData('1.19')
-      const recipeTest = mcData.itemsByName.granite
+      // const recipeTest = mcData.itemsByName
+      const recipeTest = mcData.recipes
       return {
         search_val: `${input?.search ?? 'empty'}`,
         recipe_test: recipeTest
