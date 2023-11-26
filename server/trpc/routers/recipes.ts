@@ -15,9 +15,11 @@ export const recipesRoute = router({
       const mcData = minecraftData('1.19')
       // const recipeTest = mcData.itemsByName
       const recipeTest = mcData.recipes
+      const itemTest = mcData.items
       return {
         search_val: `${input?.search ?? 'empty'}`,
-        recipe_test: recipeTest
+        recipe_test: recipeTest,
+        item_test: itemTest
       }
     })
 })
