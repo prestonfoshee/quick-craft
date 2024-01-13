@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { publicProcedure, router } from '../trpc'
+import { recipesRoute } from './recipes'
 
 export const appRouter = router({
   hello: publicProcedure
@@ -14,6 +15,7 @@ export const appRouter = router({
         time: new Date()
       }
     }),
+
   prismaTest: publicProcedure
     .query(
       async ({ ctx }) => {
@@ -23,7 +25,18 @@ export const appRouter = router({
         }
       }
       // async ({ ctx }) => await ctx.prisma.example.findMany()
-    )
+    ),
+  Recipes: recipesRoute
+
+  // getRecipes: publicProcedure
+  //   .input(
+  //     z.object({
+  //       search: z.string().nullish()
+  //     })
+  //   )
+  //   .query(({ input }) => {
+  //     return { search_val: `${input?.search ?? 'empty'}` }
+  //   })
 })
 
 // export type definition of API

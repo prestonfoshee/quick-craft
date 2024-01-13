@@ -9,14 +9,33 @@
       </div>
       <input
         id="default-search"
+        v-model="recipeSearchInputVal"
         type="search"
-        class="w-1/2 p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        class="w-1/2 p-4 pl-10 text-sm border rounded-lg bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
         placeholder="Search Recipes..."
         required
+        @keyup="getRecipe"
       >
       <!-- <button type="submit" class="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
         Search
       </button> -->
     </div>
+    <div>recipes: {{ recipeSearchResults }}</div>
+    <div>search input: {{ recipeSearchInputVal }}</div>
   </form>
 </template>
+
+<script setup>
+const { $client: trpc } = useNuxtApp()
+
+const recipeSearchInputVal = ref('')
+const recipeSearchResults = ref(null)
+
+const getRecipe = async () => {
+  console.log(recipeSearchInputVal.value)
+  recipeSearchResults.value = await trpc.Recipes.getRecipes
+    .useQuery({ search: recipeSearchInputVal.value })
+    .data
+}
+
+</script>

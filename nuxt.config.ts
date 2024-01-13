@@ -16,5 +16,12 @@ export default defineNuxtConfig({
   },
   typescript: {
     shim: false
-  }
+  },
+  components: [
+    {
+      path: '~/components/ui',
+      extensions: ['.vue'],
+      prefix: 'Ui'
+    }
+  ]
 })

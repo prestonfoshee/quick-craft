@@ -1,6 +1,12 @@
+<script setup>
+import GradientBackground from '~/components/GradientBackground.vue'
+import GradientJumbotron from '~/components/GradientJumbotron.vue'
+
+</script>
+
 <template>
   <div>
-    <gradient-jumbotron />
-    <gradient-background />
+    <GradientJumbotron />
+    <GradientBackground />
   </div>
 </template>
