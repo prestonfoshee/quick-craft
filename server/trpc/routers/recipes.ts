@@ -1,8 +1,10 @@
 // import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 // import * as trpc from '@trpc/server'
 import { z } from 'zod'
-import minecraftData from 'minecraft-data'
+import { PrismaClient } from '@prisma/client'
 import { publicProcedure, router } from '../trpc'
+
+const prisma = new PrismaClient()
 
 export const recipesRoute = router({
   getRecipes: publicProcedure
@@ -11,15 +13,27 @@ export const recipesRoute = router({
         search: z.string().nullish()
       })
     )
-    .query(({ input }) => {
-      const mcData = minecraftData('1.19')
-      // const recipeTest = mcData.itemsByName
-      const recipeTest = mcData.recipes
-      const itemTest = mcData.items
-      return {
-        search_val: `${input?.search ?? 'empty'}`,
-        recipe_test: recipeTest,
-        item_test: itemTest
-      }
+    .query(async ({ input }) => {
+      const search = input?.search || ''
+
+      const recipes = await prisma.recipe.findMany({
+        include: {
+          result_item: {
+            select: {
+              display_name: true
+            }
+          }
+        },
+        where: {
+          result_item: {
+            display_name: {
+              contains: search,
+              mode: 'insensitive'
+            }
+          }
+        }
+      })
+
+      return { recipes }
     })
 })
