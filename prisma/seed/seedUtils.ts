@@ -30,7 +30,6 @@ export const seedRecipes = async (prisma: PrismaClient, recipes: object) => {
   for (const recipe of recipePayloads) {
     try {
       await prisma.recipe.create({ data: recipe })
-      // await prisma.
     } catch (error) {
       console.error('Error seeding Recipes table: ', error)
     }

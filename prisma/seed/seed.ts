@@ -5,13 +5,14 @@ const prisma: PrismaClient = new PrismaClient();
 
 (async () => {
   try {
+    await seedItems(prisma, getMinecraftData().items)
     await seedRecipes(prisma, getMinecraftData().recipes)
-    // console.log(getMinecraftData().recipes)
-    // await seedItems(prisma, getMinecraftData().items)
   } catch (error) {
     console.error('Error:', error)
   }
 })()
+
+// might like object oriented approach better
 
 // import { PrismaClient } from '@prisma/client';
 // import { getMinecraftData, seedItems } from './seedUtils';
