@@ -6,43 +6,20 @@ generator client {
 }
 
 datasource db {
-  // NOTE: You probably want to change this to another database later on
-  provider = "sqlite"
-
-  // This value is read from the .env file.
-  url = env("DATABASE_URL")
-}
-
-model Example {
-  id      String @id @default(uuid())
-  details String
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Item {
-  id           Int    @id
+  id           Int      @unique
   name         String
   display_name String
   stack_size   Int
+  recipes      Recipe[]
 }
 
 model Recipe {
-  id Int @id @default(autoincrement())
-  result_item_id Int
-  result_quantity Int
-  recipe_shape RecipeShape[]
-}
-
-model RecipeShape {
-  id Int @id @default(autoincrement())
-  recipe_id Int
-  shape_index Int
-  item_id Int
-  quantity Int
-}
-
-model RecipeIngredient {
-  id Int @id @default(autoincrement())
-  recipe_id Int
-  item_id Int
-  quantity Int
+  result_item_id Int  @unique
+  shape          Json
+  result_item    Item @relation(fields: [result_item_id], references: [id])
 }
