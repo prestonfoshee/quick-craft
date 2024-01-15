@@ -8,7 +8,8 @@ export type InShape = number[][] | number[]
 
 export type MinecraftData = {
   items: MinecraftDataItems,
-  recipes: MinecraftDataRecipes
+  recipes: MinecraftDataRecipes,
+  // texture: string
 }
 
 export type Item = {

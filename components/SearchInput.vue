@@ -20,8 +20,14 @@
         Search
       </button> -->
     </div>
-    <div>recipes: {{ recipeSearchResults }}</div>
-    <div>search input: {{ recipeSearchInputVal }}</div>
+    <div v-if="recipeSearchResults?.value">
+      <div v-for="recipe in recipeSearchResults.value.recipes" :key="recipe.id">
+        <img :src="recipe.result_item.texture" :alt="recipe.result_item.display_name" :title="recipe.result_item.display_name">
+      </div>
+    </div>
+    <div v-else>
+      no recipes
+    </div>
   </form>
 </template>
 

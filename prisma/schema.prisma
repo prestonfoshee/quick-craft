@@ -15,6 +15,7 @@ model Item {
   name         String
   display_name String
   stack_size   Int
+  texture      String
   recipes      Recipe[]
 }
 

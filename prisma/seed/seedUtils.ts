@@ -1,10 +1,13 @@
 import minecraftData from 'minecraft-data'
 import { PrismaClient, Prisma } from '@prisma/client'
 import { Item, MinecraftData, MinecraftDataItems, MinecraftDataRecipes, InShape } from '../types/prismaTypes'
+import { assets } from './assets'
 
 export const getMinecraftData = (): MinecraftData => {
   const mcData: minecraftData.IndexedData = minecraftData('1.19')
+  // const urlTexture: string = 'https://raw.githubusercontent.com/rom1504/minecraft-assets/master/data/1.8.8/' + assets.getTexture('iron_pickaxe') + '.png'
   const items: MinecraftDataItems = mcData.items
+  const base64Texture: string = assets.textureContent.wheat_seeds.texture
   const recipes: MinecraftDataRecipes = mcData.recipes
   return { items, recipes }
 }
@@ -12,8 +15,11 @@ export const getMinecraftData = (): MinecraftData => {
 export const seedItems = async (prisma: PrismaClient, items: MinecraftDataItems): Promise<void> => {
   const itemArray: Prisma.ItemCreateInput[] = Object.values(items).map((item: Item): Prisma.ItemCreateInput => {
     const { id, name, displayName, stackSize } = item
-    return { id, name, display_name: displayName, stack_size: stackSize }
+    // const base64Texture: string = assets.getImageContent(name)
+    const urlTexture: string = 'https://raw.githubusercontent.com/rom1504/minecraft-assets/master/data/1.20.2/' + assets.getTexture(name) + '.png'
+    return { id, name, display_name: displayName, stack_size: stackSize, texture: urlTexture.replace('minecraft:', '').replace('block', 'blocks') }
   })
+  // console.log(itemArray)
   for (const item of itemArray) {
     try {
       await prisma.item.create({ data: item })
