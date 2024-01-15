@@ -1,18 +1,16 @@
 import minecraftData from 'minecraft-data'
 import { PrismaClient, Prisma } from '@prisma/client'
-import { number } from 'zod'
-import { Item, Recipe, MinecraftData, MinecraftDataItems, MinecraftDataRecipes, InShape } from '../types/prismaTypes'
+import { Item, MinecraftData, MinecraftDataItems, MinecraftDataRecipes, InShape } from '../types/prismaTypes'
 
 export const getMinecraftData = (): MinecraftData => {
   const mcData: minecraftData.IndexedData = minecraftData('1.19')
-  // const recipes = mcData.recipes
-  const items: { [id: number]: minecraftData.Item } = mcData.items
-  const recipes: { [id: number]: minecraftData.Recipe[] } = mcData.recipes
+  const items: MinecraftDataItems = mcData.items
+  const recipes: MinecraftDataRecipes = mcData.recipes
   return { items, recipes }
 }
 
 export const seedItems = async (prisma: PrismaClient, items: MinecraftDataItems): Promise<void> => {
-  const itemArray = Object.values(items).map((item: Item): Prisma.ItemCreateInput => {
+  const itemArray: Prisma.ItemCreateInput[] = Object.values(items).map((item: Item): Prisma.ItemCreateInput => {
     const { id, name, displayName, stackSize } = item
     return { id, name, display_name: displayName, stack_size: stackSize }
   })
@@ -25,7 +23,7 @@ export const seedItems = async (prisma: PrismaClient, items: MinecraftDataItems)
   }
 }
 
-export const seedRecipes = async (prisma: PrismaClient, recipes: object) => {
+export const seedRecipes = async (prisma: PrismaClient, recipes: object): Promise<void> => {
   const recipePayloads: Prisma.RecipeCreateInput[] = getReipePayloads(recipes)
   for (const recipe of recipePayloads) {
     try {

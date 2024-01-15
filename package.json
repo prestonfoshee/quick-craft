@@ -9,7 +9,8 @@
     "lint": "eslint --max-warnings 0 .",
     "typecheck": "nuxt typecheck",
     "start": "NODE_ENV=production node .output/server/index.mjs",
-    "seed": "ts-node --esm ./prisma/seed/seed.ts"
+    "seed": "ts-node --esm ./prisma/seed/seed.ts",
+    "seed-fresh": "npx prisma migrate reset --force && npm run seed"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config-typescript": "^12.0.0",

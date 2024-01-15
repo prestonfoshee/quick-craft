@@ -4,17 +4,11 @@ export type MinecraftDataItems = { [id: number]: minecraftData.Item }
 
 export type MinecraftDataRecipes = { [id: number]: minecraftData.Recipe[] }
 
+export type InShape = number[][] | number[]
+
 export type MinecraftData = {
   items: MinecraftDataItems,
   recipes: MinecraftDataRecipes
-}
-
-export type Recipe = {
-  inShape: Array<number>,
-  result: {
-    id: number,
-    count: number
-  }
 }
 
 export type Item = {
@@ -24,4 +18,10 @@ export type Item = {
   stackSize: number
 }
 
-export type InShape = number[] | number[][];
+export type Recipe = {
+  inShape: Array<number>,
+  result: {
+    id: number,
+    count: number
+  }
+}
