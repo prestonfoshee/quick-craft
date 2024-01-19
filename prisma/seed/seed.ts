@@ -1,14 +1,22 @@
+/* eslint-disable no-console */
 import { PrismaClient } from '@prisma/client'
-import { getMinecraftData, seedItems, seedRecipes } from './seedUtils'
+import { getMinecraftData, seedItems, seedRecipes, seedTextures } from './seedUtils'
 
 const prisma: PrismaClient = new PrismaClient();
 
 (async () => {
   try {
     await seedItems(prisma, getMinecraftData().items)
+    console.log('Items seeded')
+    await seedTextures(prisma, getMinecraftData().items)
+    console.log('Textures seeded')
     await seedRecipes(prisma, getMinecraftData().recipes)
+    console.log('Recipes seeded')
+    console.log('Seeding complete')
   } catch (error) {
     console.error('Error:', error)
+  } finally {
+    await prisma.$disconnect()
   }
 })()
 

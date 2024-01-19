@@ -26,7 +26,7 @@ export const appRouter = router({
       }
       // async ({ ctx }) => await ctx.prisma.example.findMany()
     ),
-  Recipes: recipesRoute
+  recipes: recipesRoute
 
   // getRecipes: publicProcedure
   //   .input(
