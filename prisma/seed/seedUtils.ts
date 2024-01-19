@@ -30,7 +30,7 @@ export const seedItems = async (prisma: PrismaClient, items: MinecraftDataItems)
 export const seedTextures = async (prisma: PrismaClient, items: MinecraftDataItems): Promise<void> => {
   const textureArray: Prisma.TextureCreateInput[] = Object.values(items).map((item: Item) => {
     const { id, name } = item
-    const urlTexture: string = `${textureBaseUrl}${assets.getTexture(name)}`
+    const urlTexture: string = `${textureBaseUrl}${assets.getTexture(name)}.png`
       .replace('minecraft:', '')
       .replace('block', 'blocks')
     return { url: urlTexture, item: { connect: { id } } }

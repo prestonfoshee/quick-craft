@@ -51,7 +51,7 @@ const recipeSearchResults = ref(null)
 
 const getRecipe = async () => {
   console.log(recipeSearchInputVal.value)
-  recipeSearchResults.value = await trpc.Recipes.getRecipes
+  recipeSearchResults.value = await trpc.recipes.getRecipes
     .useQuery({ search: recipeSearchInputVal.value })
     .data
 }

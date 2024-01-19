@@ -12,8 +12,11 @@ const prisma: PrismaClient = new PrismaClient();
     console.log('Textures seeded')
     await seedRecipes(prisma, getMinecraftData().recipes)
     console.log('Recipes seeded')
+    console.log('Seeding complete')
   } catch (error) {
     console.error('Error:', error)
+  } finally {
+    await prisma.$disconnect()
   }
 })()
 
