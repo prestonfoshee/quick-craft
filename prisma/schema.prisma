@@ -11,12 +11,18 @@ datasource db {
 }
 
 model Item {
-  id           Int      @unique
+  id           Int       @unique
   name         String
   display_name String
   stack_size   Int
-  texture      String
   recipes      Recipe[]
+  textures     Texture[]
+}
+
+model Texture {
+  item_id Int    @unique
+  url     String
+  item    Item   @relation(fields: [item_id], references: [id])
 }
 
 model Recipe {
