@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* eslint-disable no-console */
 import minecraftData from 'minecraft-data'
 import { PrismaClient, Prisma } from '@prisma/client'
@@ -28,20 +29,28 @@ export const seedItems = async (prisma: PrismaClient, items: MinecraftDataItems)
 }
 
 export const seedTextures = async (prisma: PrismaClient, items: MinecraftDataItems): Promise<void> => {
-  const textureArray: Prisma.TextureCreateInput[] = Object.values(items).map((item: Item) => {
-    const { id, name } = item
-    const urlTexture: string = `${textureBaseUrl}${assets.getTexture(name)}.png`
-      .replace('minecraft:', '')
-      .replace('block', 'blocks')
-    return { url: urlTexture, item: { connect: { id } } }
-  })
-  for (const item of textureArray) {
+  const shortenedUrls = (await shortenUrls(items) as Prisma.TextureCreateInput[])
+  for (const item of shortenedUrls) {
     try {
       await prisma.texture.create({ data: item })
     } catch (error) {
       console.error('Error seeding Items table: ', error)
     }
   }
+  // const textureArray: Prisma.TextureCreateInput[] = Object.values(items).map((item: Item) => {
+  //   const { id, name } = item
+  //   const urlTexture: string = `${textureBaseUrl}${assets.getTexture(name)}.png`
+  //     .replace('minecraft:', '')
+  //     .replace('block', 'blocks')
+  //   return { url: urlTexture, item: { connect: { id } } }
+  // })
+  // for (const item of textureArray) {
+  //   try {
+  //     await prisma.texture.create({ data: item })
+  //   } catch (error) {
+  //     console.error('Error seeding Items table: ', error)
+  //   }
+  // }
 }
 
 export const seedRecipes = async (prisma: PrismaClient, recipes: object): Promise<void> => {
@@ -65,4 +74,33 @@ function getReipePayloads (recipes: object): Prisma.RecipeCreateInput[] {
     const resultItem = { connect: { id } }
     return { result_item: resultItem, shape: shapeString }
   })
+}
+
+export async function shortenUrls (items: MinecraftDataItems): Promise<({ url: string; item: { connect: { id: number; }; }; } | undefined)[]> {
+  const apiToken = process.env.TINYURL_API_KEY
+  const url = 'https://api.tinyurl.com/create/'
+  const promises = Object.values(items).map(async (item: Item) => {
+    const { id, name } = item
+    const urlTexture: string = `${textureBaseUrl}${assets.getTexture(name)}.png`
+      .replace('minecraft:', '')
+      .replace('block', 'blocks')
+    try {
+      const response: Response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ url: urlTexture })
+      })
+      if (!response.ok) {
+        throw new Error(`Failed to shorten url: ${urlTexture}`)
+      }
+      const { data: { tiny_url } } = await response.json() as { data: { tiny_url: string } }
+      return { url: tiny_url, item: { connect: { id } } }
+    } catch (error) {
+      console.error(error)
+    }
+  })
+  return await Promise.all(promises)
 }
