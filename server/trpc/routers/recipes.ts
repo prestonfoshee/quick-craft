@@ -25,30 +25,30 @@ export const recipesRoute = router({
     )
     .query(async ({ input }) => {
       const search = input?.search || ''
-
-      const items: ItemWithRecipes = await prisma.item.findMany({
-        where: { display_name: { contains: search, mode: 'insensitive' } },
-        include: { recipes: true }
-      })
-
-      const textures: Textures[] = []
-
-      // need to check for duplicate item ids in shape
-      for (const item of items) {
-        for (const recipe of item.recipes) {
-          const shapeJsonString: number[]|null[] = JSON.parse((recipe.shape as unknown) as string)
-          const itemIdsInShape = Array.isArray(shapeJsonString[0])
-            ? shapeJsonString.flat()
-            : shapeJsonString
-          const filteredItempIdsInShape: number[] = itemIdsInShape.filter((id: number | null): id is number => id !== null)
-          const recipeTextures: Textures = await prisma.item.findMany({
-            where: { id: { in: filteredItempIdsInShape } },
-            select: { id: true, textures: { select: { url: true } } }
-          })
-          textures.push(recipeTextures)
+      // @todo: move query to repository
+      const recipes = await prisma.recipe.findMany({
+        where: {
+          result_item: {
+            display_name: {
+              contains: search
+            }
+          }
+        },
+        select: {
+          shape: true,
+          result_item: {
+            select: {
+              id: true,
+              display_name: true,
+              textures: {
+                select: {
+                  url: true
+                }
+              }
+            }
+          }
         }
-      }
-
-      return { texturesArray: textures }
+      })
+      return { recipes }
     })
 })

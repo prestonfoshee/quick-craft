@@ -1,12 +1,11 @@
 /* eslint-disable no-console */
 import { PrismaClient } from '@prisma/client'
-import { getMinecraftData, seedItems, seedRecipes, seedTextures, shortenUrls } from './seedUtils'
+import { getMinecraftData, seedItems, seedRecipes, seedTextures } from './seedUtils'
 
 const prisma: PrismaClient = new PrismaClient();
 
 (async () => {
   try {
-    console.log(await shortenUrls(getMinecraftData().items))
     await seedItems(prisma, getMinecraftData().items)
     console.log('Items seeded')
     await seedTextures(prisma, getMinecraftData().items)

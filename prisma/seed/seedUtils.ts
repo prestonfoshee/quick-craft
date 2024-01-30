@@ -1,9 +1,11 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-console */
+import { text } from 'stream/consumers'
 import minecraftData from 'minecraft-data'
 import { PrismaClient, Prisma } from '@prisma/client'
 import { Item, MinecraftData, MinecraftDataItems, MinecraftDataRecipes, InShape } from '../types/prismaTypes'
 import { assets } from './assets'
+import { textureByItemId } from './seedRepository'
 
 const textureBaseUrl = 'https://raw.githubusercontent.com/rom1504/minecraft-assets/master/data/1.20.2/'
 
@@ -37,24 +39,11 @@ export const seedTextures = async (prisma: PrismaClient, items: MinecraftDataIte
       console.error('Error seeding Items table: ', error)
     }
   }
-  // const textureArray: Prisma.TextureCreateInput[] = Object.values(items).map((item: Item) => {
-  //   const { id, name } = item
-  //   const urlTexture: string = `${textureBaseUrl}${assets.getTexture(name)}.png`
-  //     .replace('minecraft:', '')
-  //     .replace('block', 'blocks')
-  //   return { url: urlTexture, item: { connect: { id } } }
-  // })
-  // for (const item of textureArray) {
-  //   try {
-  //     await prisma.texture.create({ data: item })
-  //   } catch (error) {
-  //     console.error('Error seeding Items table: ', error)
-  //   }
-  // }
 }
 
 export const seedRecipes = async (prisma: PrismaClient, recipes: object): Promise<void> => {
-  const recipePayloads: Prisma.RecipeCreateInput[] = getReipePayloads(recipes)
+  const recipePayloads = await getReipePayloads(recipes)
+  // console.log(recipePayloads)
   for (const recipe of recipePayloads) {
     try {
       await prisma.recipe.create({ data: recipe })
@@ -64,19 +53,79 @@ export const seedRecipes = async (prisma: PrismaClient, recipes: object): Promis
   }
 }
 
-function getReipePayloads (recipes: object): Prisma.RecipeCreateInput[] {
-  return Object.values(recipes).map((recipe, i): Prisma.RecipeCreateInput => {
-    const id: number = parseInt(Object.keys(recipes)[i])
-    const inShape: InShape = recipe[0].inShape
-    const ingredients: number[] = recipe[0].ingredients
-    const shapeString: string = inShape ? JSON.stringify(inShape) : JSON.stringify(ingredients)
-    // const shapeString: string = Array.isArray(inShape) && (inShape as number[][]).every((item: number | number[]) => Array.isArray(item)) ? JSON.stringify(inShape.flat(2)) : JSON.stringify([inShape])
-    const resultItem = { connect: { id } }
-    return { result_item: resultItem, shape: shapeString }
-  })
+export const getReipePayloads = async (recipes: object): Promise<Prisma.RecipeCreateInput[]> => {
+  try {
+    const payloads = await Promise.all(
+      Object.values(recipes).map(async (recipe, i) => {
+        const id: number = parseInt(Object.keys(recipes)[i])
+        const inShape: InShape = recipe[0].inShape
+        const ingredients: number[] = recipe[0].ingredients
+        const shape: InShape = inShape || ingredients
+
+        const textures: any[] = []
+        for (const item of shape) {
+          if (Array.isArray(item)) {
+            const subArray = []
+            for (const subItem of item) {
+              if (subItem) {
+                const texture: string | undefined = await textureByItemId(subItem)
+                subArray.push(texture as string)
+              }
+            }
+            textures.push(subArray)
+          } else {
+            const texture: string | undefined = await textureByItemId(item as number)
+            textures.push(texture as string)
+          }
+        }
+        const resolvedTextures = Array.isArray(textures) ? await Promise.all(textures) : textures
+        const resultItem = { connect: { id } }
+        return { result_item: resultItem, shape: JSON.stringify(resolvedTextures) }
+      })
+    )
+    return payloads
+  } catch (error) {
+    console.error('Error fetching recipes:', error)
+    throw error
+  }
 }
 
-export async function shortenUrls (items: MinecraftDataItems): Promise<({ url: string; item: { connect: { id: number; }; }; } | undefined)[]> {
+// export const getReipePayloads = async (recipes: object) => {
+//   await Promise.all(Object.values(recipes).map(async (recipe, i) => {
+//     const id: number = parseInt(Object.keys(recipes)[i])
+//     const inShape: InShape = recipe[0].inShape
+//     const ingredients: number[] = recipe[0].ingredients
+//     const shape: InShape = inShape || ingredients
+//     let textures: string | string[]
+
+//     if (!Array.isArray(shape)) {
+//       textures = await textureByItemId(id) as string | string[]
+//     } else {
+//       textures = []
+//       for (const item of shape) {
+//         if (Array.isArray(item)) {
+//           for (const subItem of item) {
+//             if (typeof subItem === 'string') {
+//               const texture: string | undefined = await textureByItemId(parseInt(subItem))
+//               console.log(texture)
+//               textures.push(texture as string)
+//             }
+//           }
+//         } else {
+//           const texture: string | undefined = await textureByItemId(item as number)
+//           console.log(texture)
+//           textures.push(texture as string)
+//         }
+//       }
+//     }
+//     // resolve promises if textures has promises
+//     textures = Array.isArray(textures) ? await Promise.all(textures) : textures
+//     const shapeString: string = JSON.stringify(textures)
+//     return shapeString
+//   })).then(payloads => payloads)
+// }
+
+const shortenUrls = async (items: MinecraftDataItems): Promise<({ url: string; item: { connect: { id: number; }; }; } | undefined)[]> => {
   const apiToken = process.env.TINYURL_API_KEY
   const url = 'https://api.tinyurl.com/create/'
   const promises = Object.values(items).map(async (item: Item) => {
