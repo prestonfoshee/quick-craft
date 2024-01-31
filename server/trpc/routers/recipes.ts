@@ -1,20 +1,7 @@
-// import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
-// import * as trpc from '@trpc/server'
 import { z } from 'zod'
-import { PrismaClient } from '@prisma/client'
-import { faCropSimple } from '@fortawesome/free-solid-svg-icons'
+import { Recipe } from '../types/recipeTypes'
 import { publicProcedure, router } from '../trpc'
-import { assets } from './assets'
-import { ItemWithRecipes } from '~/prisma/types/prismaTypes'
-
-const prisma = new PrismaClient()
-
-type Textures = {
-  id: number;
-  textures: {
-      url: string;
-  }[]
-}[]
+import { getRecipesByDisplayName } from '../repositories/recipeRepository'
 
 export const recipesRoute = router({
   getRecipes: publicProcedure
@@ -25,28 +12,13 @@ export const recipesRoute = router({
     )
     .query(async ({ input }) => {
       const search = input?.search || ''
-      // @todo: move query to repository
-      const recipes = await prisma.recipe.findMany({
-        where: {
-          result_item: {
-            display_name: {
-              contains: search
-            }
-          }
-        },
-        select: {
-          shape: true,
-          result_item: {
-            select: {
-              id: true,
-              display_name: true,
-              textures: {
-                select: {
-                  url: true
-                }
-              }
-            }
-          }
+      const recipesData: Recipe[] = await getRecipesByDisplayName(search)
+      const recipes = recipesData.map((recipe) => {
+        return {
+          resultItemId: recipe.result_item.id,
+          resultItemTexture: recipe.result_item.textures[0].url,
+          displayName: recipe.result_item.display_name,
+          shape: JSON.parse(recipe.shape as string)
         }
       })
       return { recipes }
