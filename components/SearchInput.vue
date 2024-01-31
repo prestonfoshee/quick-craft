@@ -16,9 +16,6 @@
         required
         @keyup="getRecipe"
       >
-      <!-- <button type="submit" class="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-        Search
-      </button> -->
     </div>
   </form>
   <div
@@ -27,13 +24,14 @@
   >
     <div
       v-for="recipe in recipeSearchResults.value.recipes"
-      :key="recipe.id"
+      :key="recipe.resultItemID"
       class="flex items-center justify-between p-4 mt-4 bg-gray-700 bg-opacity-60 rounded-lg shadow-md dark:bg-gray-800 w-14 h-14"
     >
+      <!-- crossorigin="anonymous" -->
       <img
-        :src="recipe.result_item.texture"
-        :alt="recipe.result_item.display_name"
-        :title="recipe.result_item.display_name"
+        :src="recipe.resultItemTexture"
+        :alt="recipe.displayName"
+        :title="recipe.displayName"
         class="w-full h-full"
       >
     </div>
@@ -50,7 +48,6 @@ const recipeSearchInputVal = ref('')
 const recipeSearchResults = ref(null)
 
 const getRecipe = async () => {
-  console.log(recipeSearchInputVal.value)
   recipeSearchResults.value = await trpc.recipes.getRecipes
     .useQuery({ search: recipeSearchInputVal.value })
     .data

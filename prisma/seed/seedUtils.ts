@@ -67,13 +67,15 @@ export const getReipePayloads = async (recipes: object): Promise<Prisma.RecipeCr
             for (const subItem of item) {
               if (subItem) {
                 const texture: string | undefined = await textureByItemId(subItem)
-                subArray.push(texture as string)
+                const replacedTexture = texture?.replace(/http/g, 'https')
+                subArray.push(replacedTexture as string)
               }
             }
             textures.push(subArray)
           } else {
             const texture: string | undefined = await textureByItemId(item as number)
-            textures.push(texture as string)
+            const replacedTexture = texture?.replace(/http/g, 'https')
+            textures.push(replacedTexture as string)
           }
         }
         const resolvedTextures = Array.isArray(textures) ? await Promise.all(textures) : textures
@@ -109,7 +111,8 @@ const shortenUrls = async (items: MinecraftDataItems): Promise<({ url: string; i
         throw new Error(`Failed to shorten url: ${urlTexture}`)
       }
       const { data: { tiny_url } } = await response.json() as { data: { tiny_url: string } }
-      return { url: tiny_url, item: { connect: { id } } }
+      const replacedUrl = tiny_url.replace(/http/g, 'https')
+      return { url: replacedUrl, item: { connect: { id } } }
     } catch (error) {
       console.error(error)
     }

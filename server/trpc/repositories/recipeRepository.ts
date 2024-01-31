@@ -9,7 +9,8 @@ export const getRecipesByDisplayName = async (search: string): Promise<Recipe[]>
       where: {
         result_item: {
           display_name: {
-            contains: search
+            contains: search,
+            mode: 'insensitive'
           }
         }
       },
