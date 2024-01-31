@@ -1,6 +1,5 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-console */
-import { text } from 'stream/consumers'
 import minecraftData from 'minecraft-data'
 import { PrismaClient, Prisma } from '@prisma/client'
 import { Item, MinecraftData, MinecraftDataItems, MinecraftDataRecipes, InShape } from '../types/prismaTypes'
@@ -43,7 +42,6 @@ export const seedTextures = async (prisma: PrismaClient, items: MinecraftDataIte
 
 export const seedRecipes = async (prisma: PrismaClient, recipes: object): Promise<void> => {
   const recipePayloads = await getReipePayloads(recipes)
-  // console.log(recipePayloads)
   for (const recipe of recipePayloads) {
     try {
       await prisma.recipe.create({ data: recipe })
@@ -89,41 +87,6 @@ export const getReipePayloads = async (recipes: object): Promise<Prisma.RecipeCr
     throw error
   }
 }
-
-// export const getReipePayloads = async (recipes: object) => {
-//   await Promise.all(Object.values(recipes).map(async (recipe, i) => {
-//     const id: number = parseInt(Object.keys(recipes)[i])
-//     const inShape: InShape = recipe[0].inShape
-//     const ingredients: number[] = recipe[0].ingredients
-//     const shape: InShape = inShape || ingredients
-//     let textures: string | string[]
-
-//     if (!Array.isArray(shape)) {
-//       textures = await textureByItemId(id) as string | string[]
-//     } else {
-//       textures = []
-//       for (const item of shape) {
-//         if (Array.isArray(item)) {
-//           for (const subItem of item) {
-//             if (typeof subItem === 'string') {
-//               const texture: string | undefined = await textureByItemId(parseInt(subItem))
-//               console.log(texture)
-//               textures.push(texture as string)
-//             }
-//           }
-//         } else {
-//           const texture: string | undefined = await textureByItemId(item as number)
-//           console.log(texture)
-//           textures.push(texture as string)
-//         }
-//       }
-//     }
-//     // resolve promises if textures has promises
-//     textures = Array.isArray(textures) ? await Promise.all(textures) : textures
-//     const shapeString: string = JSON.stringify(textures)
-//     return shapeString
-//   })).then(payloads => payloads)
-// }
 
 const shortenUrls = async (items: MinecraftDataItems): Promise<({ url: string; item: { connect: { id: number; }; }; } | undefined)[]> => {
   const apiToken = process.env.TINYURL_API_KEY
