@@ -14,43 +14,13 @@
         class="w-1/2 p-4 pl-10 text-sm border border-transparent rounded-lg bg-opacity-60 bg-gray-700 placeholder-gray-400 text-white focus:ring-blue-500 shadow-md"
         placeholder="Search Recipes..."
         required
-        @keyup="getRecipe"
+        @keyup="() => $emit('search', recipeSearchInputVal)"
       >
     </div>
   </form>
-  <div
-    v-if="recipeSearchResults?.value"
-    class="flex gap-3 flex-wrap justify-center mt-4 -m-4"
-  >
-    <div
-      v-for="recipe in recipeSearchResults.value.recipes"
-      :key="recipe.resultItemID"
-      class="flex items-center justify-between p-4 mt-4 bg-gray-700 bg-opacity-60 rounded-lg shadow-md dark:bg-gray-800 w-14 h-14"
-    >
-      <!-- crossorigin="anonymous" -->
-      <img
-        :src="recipe.resultItemTexture"
-        :alt="recipe.displayName"
-        :title="recipe.displayName"
-        class="w-full h-full"
-      >
-    </div>
-  </div>
-  <div v-else>
-    no recipes
-  </div>
 </template>
 
 <script setup>
-const { $client: trpc } = useNuxtApp()
-
+defineEmits(['search'])
 const recipeSearchInputVal = ref('')
-const recipeSearchResults = ref(null)
-
-const getRecipe = async () => {
-  recipeSearchResults.value = await trpc.recipes.getRecipes
-    .useQuery({ search: recipeSearchInputVal.value })
-    .data
-}
-
 </script>
